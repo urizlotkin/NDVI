@@ -1,0 +1,16 @@
+pandas
+matplotlib
+seaborn
+polars
+numpy
+scikit-learn
+xgboost
+shap
+vaex
+pyarrow
+psutil
+pickle-mixin
+earthengine-api
+geemap
+tqdm
+requests
