@@ -12,17 +12,17 @@ By analyzing these patterns, we aim to understand how climate variability, tempe
 
 ---
 
-## Dataset
+## Datasets
 All datasets used in this project are available on **Google Drive**.  
 
-📂 **Google Drive Link:** `[INSERT_YOUR_GOOGLE_DRIVE_LINK_HERE]`  
+📂 **Google Drive Link:** `[[GOOGLE_DRIVE_LINK](https://drive.google.com/file/d/1CpHhtzqYwydf4RJtPePD3IM1NjZlOcH7/view?usp=sharing)]`  
 
 To run the project successfully, download the datasets and place the two folders from Google Drive inside the **main directory** of the project.
 
 ---
 
 ## How to Run the Notebooks  
-1. **Download the dataset** from Google Drive and place the folders in the project’s main directory.
+1. **Download the datasets** from Google Drive and place the folders in the project’s main directory.
 2. Install required dependencies:
    ```sh
    pip install -r requirements.txt
