@@ -15,7 +15,7 @@ By analyzing these patterns, we aim to understand how climate variability, tempe
 ## Datasets
 All datasets used in this project are available on **Google Drive**.  
 
-📂 **Google Drive Link:** `[[GOOGLE_DRIVE_LINK](https://drive.google.com/file/d/1CpHhtzqYwydf4RJtPePD3IM1NjZlOcH7/view?usp=sharing)]`  
+📂 **Google Drive Link:** `[GOOGLE_DRIVE_LINK](https://drive.google.com/file/d/1CpHhtzqYwydf4RJtPePD3IM1NjZlOcH7/view?usp=sharing)`  
 
 To run the project successfully, download the datasets and place the two folders from Google Drive inside the **main directory** of the project.
 
