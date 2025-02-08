@@ -51,3 +51,27 @@ To run the project successfully, download the datasets and place the two folders
   - The climate and environmental features most responsible for these changes.
 
 - The dataset used in this experiment contains **monthly averages** for temperature and cumulative rainfall from **August to January** to focus on the transition period into the growing season.
+
+## Other Python Files in the Project  
+The project also includes several additional Python scripts that provide functionalities for data extraction, processing, and model computation:
+
+### `api.py`
+This file contains **API calls** to the **Israel Meteorological Service** to fetch climate data.
+
+### `compute_shap_values.py`
+This script handles the computation of **Shapley values** for feature importance analysis. Since computing these values takes a long time, this script allows running it separately to avoid rerunning the entire analysis.
+
+### `extract_data.py`
+This script retrieves **NDVI and climate data** from satellite sources using **Google Earth Engine (GEE)**.
+
+### `marge_data.py`
+This file contains functionality for **merging multiple datasets** (NDVI, climate, and environmental data) into a unified dataset for analysis.
+
+### `see_data.py`
+A utility script for **exploring the datasets**, displaying basic information and statistics.
+
+### `utils.py`
+This file contains various helper functions used across the project, including:
+- **Plotting functions** for visualizing NDVI trends.
+- **Statistical calculations** for data analysis.
+- **Machine learning model utilities** for training and evaluating models.
