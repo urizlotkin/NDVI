@@ -21,6 +21,14 @@ To run the project successfully, download the datasets and place the two folders
 
 ---
 
+## How to Run the Notebooks  
+1. **Download the dataset** from Google Drive and place the folders in the project’s main directory.
+2. Install required dependencies:
+   ```sh
+   pip install -r requirements.txt
+
+---
+
 ## Experiment 1: Long-Term NDVI Trends  
 📌 **Notebook:** `NVDI_analysis_across_years_1984-2025.ipynb`  
 
@@ -43,11 +51,3 @@ To run the project successfully, download the datasets and place the two folders
   - The climate and environmental features most responsible for these changes.
 
 - The dataset used in this experiment contains **monthly averages** for temperature and cumulative rainfall from **August to January** to focus on the transition period into the growing season.
-
----
-
-## How to Run the Notebooks  
-1. **Download the dataset** from Google Drive and place the folders in the project’s main directory.
-2. Install required dependencies:
-   ```sh
-   pip install -r requirements.txt
