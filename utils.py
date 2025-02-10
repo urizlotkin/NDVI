@@ -8,6 +8,7 @@ import numpy as np
 import shap
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
+from scipy.interpolate import make_interp_spline
 
 
 
@@ -1263,4 +1264,126 @@ def plot_ndvi_trends(df: pd.DataFrame):
     plt.legend()
 
     # Show the plot
+    plt.show()
+    
+
+def plot_4_graphs_smooth(df: pd.DataFrame) -> None:
+    """
+    Splits the monthly averages into two groups:
+      - Group 1: October to March (for Oct–Dec, SeasonYear = Year+1; for Jan–Mar, SeasonYear = Year)
+      - Group 2: April to September (SeasonYear = Year)
+    
+    Computes the monthly averages of TX(homog) and TN(homog) for each SeasonYear,
+    smooths the time series using spline interpolation, and plots 4 graphs:
+      Graph 1: TX (Group 1: Oct-Mar)
+      Graph 2: TN (Group 1: Oct-Mar)
+      Graph 3: TX (Group 2: Apr-Sep)
+      Graph 4: TN (Group 2: Apr-Sep)
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Must include at least:
+           - "Date": as a string ("YYYY-MM-DD") or datetime
+           - "TX(homog)": numeric values
+           - "TN(homog)": numeric values
+    """
+    # Ensure Date is datetime.
+    if not pd.api.types.is_datetime64_any_dtype(df["Date"]):
+        df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d", errors="coerce")
+    
+    # Extract Year and Month.
+    df["Year"] = df["Date"].dt.year
+    df["Month"] = df["Date"].dt.month
+
+    # ---- Group 1: October to March ----
+    group1 = df[df["Month"].isin([10, 11, 12, 1, 2, 3])].copy()
+    # For months 10-12, assign SeasonYear = Year + 1, so that Oct-Dec 2020
+    # joins Jan-Mar 2021.
+    group1["SeasonYear"] = group1.apply(
+        lambda row: row["Year"] + 1 if row["Month"] in [10, 11, 12] else row["Year"],
+        axis=1
+    )
+    # Compute monthly averages.
+    group1_avg = group1.groupby(["SeasonYear", "Month"])[["TX(homog)", "TN(homog)"]].mean().reset_index()
+    # Pivot so rows = SeasonYear and columns = Month.
+    pivot_tx_group1 = group1_avg.pivot(index="SeasonYear", columns="Month", values="TX(homog)")
+    pivot_tn_group1 = group1_avg.pivot(index="SeasonYear", columns="Month", values="TN(homog)")
+    # Desired order for Group1 months: October, November, December, January, February, March.
+    order_group1 = [10, 11, 12, 1, 2, 3]
+
+    # ---- Group 2: April to September ----
+    group2 = df[df["Month"].isin([4, 5, 6, 7, 8, 9])].copy()
+    group2["SeasonYear"] = group2["Year"]  # Use calendar year.
+    group2_avg = group2.groupby(["SeasonYear", "Month"])[["TX(homog)", "TN(homog)"]].mean().reset_index()
+    pivot_tx_group2 = group2_avg.pivot(index="SeasonYear", columns="Month", values="TX(homog)")
+    pivot_tn_group2 = group2_avg.pivot(index="SeasonYear", columns="Month", values="TN(homog)")
+    # Order for Group2 months: April, May, June, July, August, September.
+    order_group2 = [4, 5, 6, 7, 8, 9]
+
+    # ---- Define a smoothing function using spline interpolation ----
+    def smooth_line(x, y, num_points=300, spline_order=3):
+        """Return smooth x and y arrays after filtering non-finite values."""
+        mask = np.isfinite(x) & np.isfinite(y)
+        x_clean = x[mask]
+        y_clean = y[mask]
+        if len(x_clean) < spline_order + 1:
+            return x, y
+        x_new = np.linspace(x_clean.min(), x_clean.max(), num_points)
+        spline = make_interp_spline(x_clean, y_clean, k=spline_order)
+        y_new = spline(x_new)
+        return x_new, y_new
+
+    # ---- Create a 2x2 grid for 4 graphs ----
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    
+    # Graph 1: TX (Group 1: Oct-Mar)
+    for month in order_group1:
+        if month in pivot_tx_group1.columns:
+            x = pivot_tx_group1.index.values.astype(float)
+            y = pivot_tx_group1[month].values.astype(float)
+            x_smooth, y_smooth = smooth_line(x, y)
+            axes[0, 0].plot(x_smooth, y_smooth, label=calendar.month_abbr[month], linewidth=2)
+    axes[0, 0].set_title("TX(homog) - October to March")
+    axes[0, 0].set_xlabel("Season Year")
+    axes[0, 0].set_ylabel("TX(homog)")
+    axes[0, 0].legend()
+
+    # Graph 2: TN (Group 1: Oct-Mar)
+    for month in order_group1:
+        if month in pivot_tn_group1.columns:
+            x = pivot_tn_group1.index.values.astype(float)
+            y = pivot_tn_group1[month].values.astype(float)
+            x_smooth, y_smooth = smooth_line(x, y)
+            axes[0, 1].plot(x_smooth, y_smooth, label=calendar.month_abbr[month], linewidth=2)
+    axes[0, 1].set_title("TN(homog) - October to March")
+    axes[0, 1].set_xlabel("Season Year")
+    axes[0, 1].set_ylabel("TN(homog)")
+    axes[0, 1].legend()
+
+    # Graph 3: TX (Group 2: Apr-Sep)
+    for month in order_group2:
+        if month in pivot_tx_group2.columns:
+            x = pivot_tx_group2.index.values.astype(float)
+            y = pivot_tx_group2[month].values.astype(float)
+            x_smooth, y_smooth = smooth_line(x, y)
+            axes[1, 0].plot(x_smooth, y_smooth, label=calendar.month_abbr[month], linewidth=2)
+    axes[1, 0].set_title("TX(homog) - April to September")
+    axes[1, 0].set_xlabel("Season Year")
+    axes[1, 0].set_ylabel("TX(homog)")
+    axes[1, 0].legend()
+
+    # Graph 4: TN (Group 2: Apr-Sep)
+    for month in order_group2:
+        if month in pivot_tn_group2.columns:
+            x = pivot_tn_group2.index.values.astype(float)
+            y = pivot_tn_group2[month].values.astype(float)
+            x_smooth, y_smooth = smooth_line(x, y)
+            axes[1, 1].plot(x_smooth, y_smooth, label=calendar.month_abbr[month], linewidth=2)
+    axes[1, 1].set_title("TN(homog) - April to September")
+    axes[1, 1].set_xlabel("Season Year")
+    axes[1, 1].set_ylabel("TN(homog)")
+    axes[1, 1].legend()
+
+    plt.tight_layout()
     plt.show()
